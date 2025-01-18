@@ -1,6 +1,22 @@
 import { defineEventHandler, getQuery, sendRedirect } from "h3";
 import { QueryValue } from "ufo";
 import { PrismaClient } from "@prisma/client";
+import * as jose from "jose";
+
+const generateJWT = async (
+  payload: { [key: string]: any },
+  expirationTime: string
+) => {
+  const privateKey = process.env.JWT_KEY;
+  const secret = new TextEncoder().encode(privateKey);
+  const alg = "HS256";
+  const key = await new jose.SignJWT(payload)
+    .setProtectedHeader({ alg })
+    .setIssuedAt()
+    .setExpirationTime(`${expirationTime}s`)
+    .sign(secret);
+  return key;
+};
 
 const getToken = async (code: QueryValue) => {
   const fetchToken = await fetch(
@@ -65,6 +81,14 @@ export default defineEventHandler(async (event) => {
           await prisma.$disconnect();
         });
     }
+
+    const jwt = await generateJWT({ githubId: userJson.id }, token.expires_in);
+
+    setCookie(event, "jwt", jwt, {
+      maxAge: token.expires_in,
+      path: "/",
+    });
+
     setCookie(event, "token", token.access_token, {
       maxAge: token.expires_in,
       path: "/",
