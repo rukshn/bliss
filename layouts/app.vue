@@ -23,6 +23,9 @@ const channelDescription = ref("");
 const projects: Ref<{ title: string; description: string; id: number }[]> = ref(
   []
 );
+const newProjectDialog = ref(false);
+const newChannelDialog = ref(false);
+const activeChannels = ref([]);
 
 const newProject = ref({ projectName: "", projectDescription: "" });
 
@@ -40,6 +43,11 @@ const createProject = (e: Event) => {
       title: newProject.value.projectName,
       description: newProject.value.projectDescription,
     }),
+  }).then((response) => {
+    if (response.status === 200) {
+      newProject.value.projectName = "";
+      newProject.value.projectDescription = "";
+    }
   });
 };
 
@@ -49,25 +57,57 @@ const activeProject: Ref<{ title: string; description: string; id: number }> =
     description: "",
     id: 0,
   });
-const selectProject = (project: {
+
+const selectProject = async (project: {
   title: string;
   description: string;
   id: number;
 }) => {
   activeProject.value = project;
+
+  const activeProjectChannels = await fetch(
+    `/api/project/getProjectChannels/${project.id}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${jwt.value}`,
+      },
+    }
+  )
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      activeChannels.value = data.data[0].Channel;
+    });
 };
+
 const createChannel = (e: Event) => {
   e.preventDefault();
+  if (activeProject.value.id === 0) {
+    return;
+  }
   fetch("/api/channel/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${jwt.value}`,
     },
     body: JSON.stringify({
       name: channelName.value,
       description: channelDescription.value,
+      project: activeProject.value.id,
     }),
-  });
+  })
+    .then((response) => {
+      if (response.status === 200) {
+        channelName.value = "";
+        channelDescription.value = "";
+      }
+    })
+    .finally(() => {
+      newChannelDialog.value = false;
+    });
 };
 
 onBeforeMount(() => {
@@ -86,7 +126,7 @@ onMounted(() => {
   })
     .then((response) => response.json())
     .then((data) => {
-      projects.value = data;
+      projects.value = data.data[0].Project;
     })
     .catch((error) => console.error("Error:", error));
 });
@@ -98,7 +138,7 @@ onMounted(() => {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Dialog>
+              <Dialog v-model:open="newProjectDialog">
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <SidebarMenuButton
@@ -139,7 +179,9 @@ onMounted(() => {
                       >
                         <UsersRound class="size-4" />
                       </div>
-                      {{ project.title }}
+                      <div class="font-medium text-muted-foreground">
+                        {{ project.title }}
+                      </div>
                       <DropdownMenuShortcut
                         >⌘{{ index + 1 }}</DropdownMenuShortcut
                       >
@@ -238,7 +280,7 @@ onMounted(() => {
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
 
-                      <Dialog>
+                      <Dialog v-model:open="newChannelDialog">
                         <SidebarMenuSubItem>
                           <DialogTrigger as-child>
                             <SidebarMenuSubButton as-child>
