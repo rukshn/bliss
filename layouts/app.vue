@@ -11,6 +11,8 @@ import {
   Bell,
   CreditCard,
   LogOut,
+  Plus,
+  UsersRound,
 } from "lucide-vue-next";
 
 import { userStore } from "~/stores/user";
@@ -21,11 +23,29 @@ const channelDescription = ref("");
 const projects: Ref<{ title: string; description: string; id: number }[]> = ref(
   []
 );
+
+const newProject = ref({ projectName: "", projectDescription: "" });
+
 const jwt = useCookie("jwt");
+
+const createProject = (e: Event) => {
+  e.preventDefault();
+  fetch("/api/project/create", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${jwt.value}`,
+    },
+    body: JSON.stringify({
+      title: newProject.value.projectName,
+      description: newProject.value.projectDescription,
+    }),
+  });
+};
 
 const activeProject: Ref<{ title: string; description: string; id: number }> =
   ref({
-    title: "",
+    title: "No project selected",
     description: "",
     id: 0,
   });
@@ -58,10 +78,10 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  const fetchProjects = fetch("/api/projects", {
+  const fetchProjects = fetch("/api/project/getUserProjects", {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${jwt}`,
+      Authorization: `Bearer ${jwt.value}`,
     },
   })
     .then((response) => response.json())
@@ -78,64 +98,96 @@ onMounted(() => {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <SidebarMenuButton
-                    size="lg"
-                    class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              <Dialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <SidebarMenuButton
+                      size="lg"
+                      class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                    >
+                      <div
+                        class="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
+                      >
+                        <UsersRound class="size-4" />
+                      </div>
+                      <div class="grid flex-1 text-left text-sm leading-tight">
+                        <span class="truncate font-semibold">{{
+                          activeProject.title
+                        }}</span>
+                        <span class="truncate text-xs">{{}}</span>
+                      </div>
+                      <ChevronsUpDown class="ml-auto" />
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                    align="start"
+                    side="bottom"
+                    :side-offset="4"
                   >
-                    <div
-                      class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+                    <DropdownMenuLabel class="text-xs text-muted-foreground">
+                      Teams
+                    </DropdownMenuLabel>
+                    <DropdownMenuItem
+                      v-for="(project, index) in projects"
+                      :key="index"
+                      class="gap-2 p-2"
+                      @click="selectProject(project)"
                     >
-                      <component class="size-4" />
+                      <div
+                        class="flex size-6 items-center justify-center rounded-sm border"
+                      >
+                        <UsersRound class="size-4" />
+                      </div>
+                      {{ project.title }}
+                      <DropdownMenuShortcut
+                        >⌘{{ index + 1 }}</DropdownMenuShortcut
+                      >
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem class="gap-2 p-2">
+                      <div
+                        class="flex size-6 items-center justify-center rounded-md border bg-background"
+                      >
+                        <Plus class="size-4" />
+                      </div>
+                      <div class="font-medium text-muted-foreground">
+                        <DialogTrigger as-child>
+                          <Button variant="ghost"> Add Project </Button>
+                        </DialogTrigger>
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create new project</DialogTitle>
+                    <DialogDescription>
+                      Create a new project by entering project name and
+                      description.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form class="grid gap-4" @submit="createProject">
+                    <div>
+                      <Input
+                        v-model="newProject.projectName"
+                        label="Project Name"
+                        placeholder="Enter project name"
+                      />
                     </div>
-                    <div class="grid flex-1 text-left text-sm leading-tight">
-                      <span class="truncate font-semibold">{{
-                        activeProject.title
-                      }}</span>
-                      <span class="truncate text-xs">{{}}</span>
+                    <div>
+                      <Input
+                        v-model="newProject.projectDescription"
+                        label="Project Description"
+                        placeholder="Enter project description"
+                      />
                     </div>
-                    <ChevronsUpDown class="ml-auto" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                  align="start"
-                  side="bottom"
-                  :side-offset="4"
-                >
-                  <DropdownMenuLabel class="text-xs text-muted-foreground">
-                    Teams
-                  </DropdownMenuLabel>
-                  <DropdownMenuItem
-                    v-for="(project, index) in projects"
-                    :key="index"
-                    class="gap-2 p-2"
-                    @click="selectProject(project)"
-                  >
-                    <div
-                      class="flex size-6 items-center justify-center rounded-sm border"
-                    >
-                      <component class="size-4 shrink-0" />
+                    <div class="flex justify-end gap-4">
+                      <Button>Create</Button>
                     </div>
-                    {{ project.title }}
-                    <DropdownMenuShortcut
-                      >⌘{{ index + 1 }}</DropdownMenuShortcut
-                    >
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem class="gap-2 p-2">
-                    <div
-                      class="flex size-6 items-center justify-center rounded-md border bg-background"
-                    >
-                      <Plus class="size-4" />
-                    </div>
-                    <div class="font-medium text-muted-foreground">
-                      Add team
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
