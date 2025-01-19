@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
 
     const userJson = await user.json();
     const prisma = new PrismaClient();
-    const dbUser = await prisma.user
+    let dbUser = await prisma.user
       .findUnique({
         where: { githubId: userJson.id },
       })
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
     if (dbUser === null) {
       const prisma = new PrismaClient();
-      await prisma.user
+      dbUser = await prisma.user
         .create({
           data: {
             githubId: userJson.id,
@@ -82,7 +82,10 @@ export default defineEventHandler(async (event) => {
         });
     }
 
-    const jwt = await generateJWT({ githubId: userJson.id }, token.expires_in);
+    const jwt = await generateJWT(
+      { githubId: userJson.id, userId: dbUser.id },
+      token.expires_in
+    );
 
     setCookie(event, "jwt", jwt, {
       maxAge: token.expires_in,
