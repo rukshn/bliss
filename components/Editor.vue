@@ -89,7 +89,11 @@ onBeforeUnmount(() => {
         <List />
       </Button>
     </div>
-
+    <input
+      type="text"
+      v-model="store.title"
+      class="border-none w-full p-1 focus:outline-none bg-transparent text-lg font-semibold"
+    />
     <TiptapEditorContent :editor="editor" />
   </div>
 </template>

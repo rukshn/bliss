@@ -3,6 +3,7 @@ import { sendRedirect } from "h3";
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const prisma = new PrismaClient();
+
   const user = await prisma.user.findUnique({
     where: {
       id: 1,
@@ -17,6 +18,7 @@ export default defineEventHandler(async (event) => {
       content: body.content,
       published: true,
       authorId: user.id,
+      channelId: body.channelId,
     },
   });
 
