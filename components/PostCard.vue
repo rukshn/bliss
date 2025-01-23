@@ -1,0 +1,43 @@
+<script lang="ts" setup>
+const props = defineProps<{
+  post: {
+    id: number;
+    title: string;
+    createdBy: {
+      username: string;
+      profilePicture: string;
+    };
+    createdAt: Date;
+    channel: {
+      name: string;
+      id: number;
+    };
+  };
+}>();
+</script>
+
+<template>
+  <div class="py-4">
+    <div class="flex items-center">
+      <div class="flex items-center gap-4 flex-grow">
+        <Avatar>
+          <AvatarImage :src="post.createdBy.profilePicture" />
+          <AvatarFallback>{{ post.createdBy.username[0] }}</AvatarFallback>
+        </Avatar>
+        <div class="grid">
+          <a
+            :href="`/post/${post.id}`"
+            class="text-lg font-semibold"
+            variant="link"
+            >{{ post.title }}</a
+          >
+          <div class="flex items-center gap-2" py-1 m-0>
+            <Badge variant="secondary">0</Badge>
+            <p class="leading-3 text-sm">Channel</p>
+          </div>
+        </div>
+        <p class="ml-auto">{{ post.channel.name }}</p>
+      </div>
+    </div>
+  </div>
+</template>

@@ -2,6 +2,12 @@ import { defineEventHandler, getQuery, sendRedirect } from "h3";
 import { QueryValue } from "ufo";
 import { PrismaClient } from "@prisma/client";
 import * as jose from "jose";
+import crypto from "crypto";
+
+const getGravatar = (email: string) => {
+  const hash = crypto.createHash("sha256").update(email).digest("hex");
+  return `https://www.gravatar.com/avatar/${hash}`;
+};
 
 const generateJWT = async (
   payload: { [key: string]: any },
@@ -38,6 +44,7 @@ const getToken = async (code: QueryValue) => {
   const response = await fetchToken.json();
   return response;
 };
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   if (!query.code) {
@@ -96,6 +103,7 @@ export default defineEventHandler(async (event) => {
       maxAge: token.expires_in,
       path: "/",
     });
+
     setCookie(event, "refresh_token", token.refresh_token, {
       maxAge: token.refresh_token_expires_in,
       path: "/",

@@ -18,7 +18,9 @@ import {
 
 import { userStore } from "~/stores/user";
 import { channelStore } from "~/stores/channel";
+import { feedStore } from "~/stores/feed";
 
+const feed = feedStore();
 const store = userStore();
 const chStore = channelStore();
 const channelName = ref("");
@@ -33,12 +35,13 @@ const activeChannel: Ref<{ title: string; description: string; id: number }> =
     description: "",
     id: 0,
   });
+
 const newChannelDialog = ref(false);
+
 const activeChannels: Ref<
   { title: string; description: string; id: number }[]
 > = ref([]);
 
-const posts = ref([]);
 const newProject = ref({ projectName: "", projectDescription: "" });
 
 const jwt = useCookie("jwt");
@@ -87,7 +90,7 @@ const getChannelPosts = (channel: {
       return res.json();
     })
     .then((data) => {
-      posts.value = data.data;
+      feed.feed = data.data;
     });
 };
 
@@ -97,7 +100,6 @@ const selectProject = async (project: {
   id: number;
 }) => {
   activeProject.value = project;
-
   const activeProjectChannels = await fetch(
     `/api/project/getProjectChannels/${project.id}`,
     {
@@ -151,6 +153,11 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  const jwt = useCookie("jwt");
+  if (!jwt.value) {
+    navigateTo("/login");
+  }
+
   const fetchProjects = fetch("/api/project/getUserProjects", {
     method: "GET",
     headers: {

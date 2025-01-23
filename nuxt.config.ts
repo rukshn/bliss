@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     "shadcn-nuxt",
     "@nuxtjs/color-mode",
     "nuxt-tiptap-editor",
-    "@pinia/nuxt"
+    "@pinia/nuxt",
   ],
   shadcn: {
     /**
