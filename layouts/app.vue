@@ -13,19 +13,35 @@ import {
   LogOut,
   Plus,
   UsersRound,
+  Hash,
 } from "lucide-vue-next";
 
 import { userStore } from "~/stores/user";
+import { channelStore } from "~/stores/channel";
+import { feedStore } from "~/stores/feed";
 
+const feed = feedStore();
 const store = userStore();
+const chStore = channelStore();
 const channelName = ref("");
+const channelCollapseOpen = ref(false);
 const channelDescription = ref("");
 const projects: Ref<{ title: string; description: string; id: number }[]> = ref(
   []
 );
 const newProjectDialog = ref(false);
+const activeChannel: Ref<{ title: string; description: string; id: number }> =
+  ref({
+    title: "No channel selected",
+    description: "",
+    id: 0,
+  });
+
 const newChannelDialog = ref(false);
-const activeChannels = ref([]);
+
+const activeChannels: Ref<
+  { title: string; description: string; id: number }[]
+> = ref([]);
 
 const newProject = ref({ projectName: "", projectDescription: "" });
 
@@ -58,12 +74,50 @@ const activeProject: Ref<{ title: string; description: string; id: number }> =
     id: 0,
   });
 
+// TODO: change the name to select Channel as it is confusing
+const getChannelPosts = (channel: {
+  id: number;
+  title: string;
+  description: string;
+  projectId: number;
+}) => {
+  if (activeProject.value.id !== channel.projectId) {
+    return;
+  }
+
+  activeChannel.value = channel;
+  chStore.channel = channel;
+  const channelCookie = useCookie("activeChannel", {
+    path: "/",
+    expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365),
+  });
+  channelCookie.value = JSON.stringify(channel);
+
+  fetch(`/api/channel/getChannelPosts/${channel.id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt.value}`,
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      feed.feed = data.data;
+    });
+};
+
 const selectProject = async (project: {
   title: string;
   description: string;
   id: number;
 }) => {
   activeProject.value = project;
+  const projectCookie = useCookie("activeProject", {
+    path: "/",
+    expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365),
+  });
+  projectCookie.value = JSON.stringify(project);
 
   const activeProjectChannels = await fetch(
     `/api/project/getProjectChannels/${project.id}`,
@@ -78,7 +132,7 @@ const selectProject = async (project: {
       return res.json();
     })
     .then((data) => {
-      activeChannels.value = data.data[0].Channel;
+      activeChannels.value = data.data;
     });
 };
 
@@ -118,6 +172,11 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
+  const jwt = useCookie("jwt");
+  if (!jwt.value) {
+    navigateTo("/login");
+  }
+
   const fetchProjects = fetch("/api/project/getUserProjects", {
     method: "GET",
     headers: {
@@ -127,6 +186,17 @@ onMounted(() => {
     .then((response) => response.json())
     .then((data) => {
       projects.value = data.data[0].Project;
+      const lastProject = useCookie("activeProject");
+      const lastChannel = useCookie("activeChannel");
+
+      if (lastProject.value) {
+        selectProject(lastProject.value as any);
+      }
+
+      if (lastChannel.value) {
+        getChannelPosts(lastChannel.value as any);
+        channelCollapseOpen.value = true;
+      }
     })
     .catch((error) => console.error("Error:", error));
 });
@@ -236,32 +306,42 @@ onMounted(() => {
         <SidebarContent>
           <SidebarGroup>
             <nav class="grid items-start px-2 font-medium lg:px-4">
-              <a
-                href="/"
-                class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              <Button
+                variant="ghost"
+                @click="
+                  chStore.channel = { title: 'Home', description: '', id: 0 }
+                "
+                class="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Home class="h-4 w-4" />
                 Home
-              </a>
-              <a
-                href="/"
-                class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              </Button>
+              <Button
+                variant="ghost"
+                @click="
+                  chStore.channel = { title: 'Inbox', description: '', id: 0 }
+                "
+                class="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Inbox class="h-4 w-4" />
-                Inbox</a
+                Inbox</Button
               >
-              <a
-                href="/"
-                class="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              <Button
+                variant="ghost"
+                class="flex justify-start items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Paperclip class="h-4 w-4" />
-                Documents</a
+                Documents</Button
               >
             </nav>
           </SidebarGroup>
           <SidebarGroup>
             <SidebarMenu>
-              <Collapsible as-child class="px-5 group/collapsible">
+              <Collapsible
+                v-model:open="channelCollapseOpen"
+                as-child
+                class="px-5 group/collapsible"
+              >
                 <SidebarMenuItem>
                   <CollapsibleTrigger as-child>
                     <SidebarMenuButton>
@@ -274,9 +354,26 @@ onMounted(() => {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton as-child>
-                          <span>Inbox</span>
+                      <SidebarMenuSubItem
+                        v-for="(channel, index) in activeChannels"
+                        :key="index"
+                      >
+                        <SidebarMenuSubButton
+                          :class="{
+                            'bg-muted text-foreground-accent':
+                              activeChannel.id === channel.id,
+                          }"
+                          :is-active="activeChannel.id === channel.id"
+                          as-child
+                        >
+                          <Button
+                            variant="ghost"
+                            @click="getChannelPosts(channel)"
+                          >
+                            <span class="flex items-center"
+                              ><Hash class="mr-1.5" /> {{ channel.title }}</span
+                            >
+                          </Button>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
 

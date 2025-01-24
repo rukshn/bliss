@@ -3,9 +3,10 @@ import { sendRedirect } from "h3";
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const prisma = new PrismaClient();
+
   const user = await prisma.user.findUnique({
     where: {
-      id: 1,
+      id: event.context.userId,
     },
   });
   if (user === null) {
@@ -14,9 +15,10 @@ export default defineEventHandler(async (event) => {
   const post = await prisma.post.create({
     data: {
       title: body.title,
-      content: body.content,
+      content: body.post,
       published: true,
       authorId: user.id,
+      channelId: body.channelId,
     },
   });
 
