@@ -24,6 +24,7 @@ const feed = feedStore();
 const store = userStore();
 const chStore = channelStore();
 const channelName = ref("");
+const channelCollapseOpen = ref(false);
 const channelDescription = ref("");
 const projects: Ref<{ title: string; description: string; id: number }[]> = ref(
   []
@@ -73,13 +74,25 @@ const activeProject: Ref<{ title: string; description: string; id: number }> =
     id: 0,
   });
 
+// TODO: change the name to select Channel as it is confusing
 const getChannelPosts = (channel: {
   id: number;
   title: string;
   description: string;
+  projectId: number;
 }) => {
+  if (activeProject.value.id !== channel.projectId) {
+    return;
+  }
+
   activeChannel.value = channel;
   chStore.channel = channel;
+  const channelCookie = useCookie("activeChannel", {
+    path: "/",
+    expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365),
+  });
+  channelCookie.value = JSON.stringify(channel);
+
   fetch(`/api/channel/getChannelPosts/${channel.id}`, {
     method: "GET",
     headers: {
@@ -100,6 +113,12 @@ const selectProject = async (project: {
   id: number;
 }) => {
   activeProject.value = project;
+  const projectCookie = useCookie("activeProject", {
+    path: "/",
+    expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365),
+  });
+  projectCookie.value = JSON.stringify(project);
+
   const activeProjectChannels = await fetch(
     `/api/project/getProjectChannels/${project.id}`,
     {
@@ -167,6 +186,17 @@ onMounted(() => {
     .then((response) => response.json())
     .then((data) => {
       projects.value = data.data[0].Project;
+      const lastProject = useCookie("activeProject");
+      const lastChannel = useCookie("activeChannel");
+
+      if (lastProject.value) {
+        selectProject(lastProject.value as any);
+      }
+
+      if (lastChannel.value) {
+        getChannelPosts(lastChannel.value as any);
+        channelCollapseOpen.value = true;
+      }
     })
     .catch((error) => console.error("Error:", error));
 });
@@ -307,7 +337,11 @@ onMounted(() => {
           </SidebarGroup>
           <SidebarGroup>
             <SidebarMenu>
-              <Collapsible as-child class="px-5 group/collapsible">
+              <Collapsible
+                v-model:open="channelCollapseOpen"
+                as-child
+                class="px-5 group/collapsible"
+              >
                 <SidebarMenuItem>
                   <CollapsibleTrigger as-child>
                     <SidebarMenuButton>
