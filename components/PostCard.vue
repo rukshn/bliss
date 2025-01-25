@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 const props = defineProps<{
   post: {
-    id: number;
+    uuid: string;
     title: string;
     createdBy: {
       username: string;
@@ -26,7 +26,7 @@ const props = defineProps<{
         </Avatar>
         <div class="grid">
           <a
-            :href="`/post/${post.id}`"
+            :href="`/post/${post.uuid}`"
             class="text-lg font-semibold"
             variant="link"
             >{{ post.title }}</a

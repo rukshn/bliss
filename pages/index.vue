@@ -17,32 +17,7 @@ const user = userStore();
 
 const toggleEditor = () => {
   store.open = !store.open;
-  console.log(store.open);
 };
-
-onBeforeMount(() => {
-  const token = useCookie("token");
-  const jwt = useCookie("jwt");
-  if (token) {
-    fetch("/api/user/me", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${jwt.value}`,
-        Accept: "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        username.value = data.data.user.name;
-        profilePic.value = data.data.user.gravatar;
-        user.user.email = data.data.user.email;
-        user.user.githubId = data.data.user.id;
-        user.user.avatar = data.data.user.gravatar;
-        user.user.name = data.data.user.name;
-      })
-      .catch((error) => console.error("Error:", error));
-  }
-});
 
 const submitPost = () => {
   const jwt = useCookie("jwt");
@@ -83,7 +58,7 @@ const submitPost = () => {
         <div class="bg-gray-100 py-3 rounded-lg px-3">
           <div class="flex items-center gap-3">
             <Avatar>
-              <AvatarImage :src="profilePic" />
+              <AvatarImage :src="user.user.avatar ?? ''" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
             <Label>{{ username }}</Label>

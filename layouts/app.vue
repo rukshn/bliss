@@ -40,7 +40,7 @@ const activeChannel: Ref<{ title: string; description: string; id: number }> =
 const newChannelDialog = ref(false);
 
 const activeChannels: Ref<
-  { title: string; description: string; id: number }[]
+  { title: string; description: string; id: number; projectId: number }[]
 > = ref([]);
 
 const newProject = ref({ projectName: "", projectDescription: "" });
@@ -74,7 +74,16 @@ const activeProject: Ref<{ title: string; description: string; id: number }> =
     id: 0,
   });
 
-// TODO: change the name to select Channel as it is confusing
+const navigateToChannel = (channel: {
+  title: string;
+  description: string;
+  id: number;
+  projectId: number;
+}) => {
+  navigateTo("/");
+  getChannelPosts(channel);
+};
+
 const getChannelPosts = (channel: {
   id: number;
   title: string;
@@ -168,7 +177,22 @@ onBeforeMount(() => {
   const token = useCookie("token");
   if (!token.value) {
     navigateTo("/login");
+    return;
   }
+
+  const user = fetch("/api/user/me", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt.value}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      store.user.avatar = data.data.user.gravatar;
+      store.user.name = data.data.user.name;
+      store.user.email = data.data.user.email;
+      store.user.id = data.data.user.id;
+    });
 });
 
 onMounted(() => {
@@ -368,7 +392,7 @@ onMounted(() => {
                         >
                           <Button
                             variant="ghost"
-                            @click="getChannelPosts(channel)"
+                            @click="navigateToChannel(channel)"
                           >
                             <span class="flex items-center"
                               ><Hash class="mr-1.5" /> {{ channel.title }}</span

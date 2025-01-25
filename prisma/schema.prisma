@@ -33,6 +33,10 @@ model Post {
   channelId  Int
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
+  parent     Post?    @relation("PostToPost", fields: [parentId], references: [id])
+  parentId   Int?
+
+  Post Post[] @relation("PostToPost")
 }
 
 model Project {

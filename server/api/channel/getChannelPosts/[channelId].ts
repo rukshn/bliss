@@ -9,7 +9,7 @@ const getChannelPosts = async (channelId: number) => {
       published: true,
     },
     select: {
-      id: true,
+      uuid: true,
       title: true,
       created_at: true,
       channel: {
@@ -29,7 +29,7 @@ const getChannelPosts = async (channelId: number) => {
   await prisma.$disconnect();
   const tempPosts = posts.map((post) => {
     return {
-      id: post.id,
+      uuid: post.uuid,
       title: post.title,
       createdAt: post.created_at,
       createdBy: {

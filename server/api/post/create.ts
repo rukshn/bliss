@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
       published: true,
       authorId: user.id,
       channelId: body.channelId,
+      parentId: body.parentId,
     },
   });
 
