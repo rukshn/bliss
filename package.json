@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxt/kit": "^3.15.3",
     "@nuxtjs/color-mode": "3.5.2",
     "@nuxtjs/tailwindcss": "6.13.1",
     "@pinia/nuxt": "^0.9.0",
@@ -17,6 +18,7 @@
     "@radix-icons/vue": "^1.0.0",
     "@tiptap/extension-placeholder": "^2.11.3",
     "@vueuse/core": "^12.5.0",
+    "argon2": "^0.41.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "hotkeys-js": "^3.13.9",
@@ -35,6 +37,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
+    "@types/bun": "^1.2.0",
     "@types/node": "^22.10.10"
   }
 }
