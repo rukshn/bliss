@@ -12,12 +12,13 @@ const props = defineProps<{
       name: string;
       id: number;
     };
+    comments: number;
   };
 }>();
 </script>
 
 <template>
-  <div class="py-4">
+  <div class="py-2 my-2 hover:bg-gray-50 rounded-lg px-4">
     <div class="flex items-center">
       <div class="flex items-center gap-4 flex-grow">
         <Avatar>
@@ -27,12 +28,12 @@ const props = defineProps<{
         <div class="grid">
           <a
             :href="`/post/${post.uuid}`"
-            class="text-lg font-semibold"
+            class="text-gray-800 font-medium"
             variant="link"
             >{{ post.title }}</a
           >
           <div class="flex items-center gap-2" py-1 m-0>
-            <Badge variant="secondary">0</Badge>
+            <Badge variant="secondary">{{ post.comments }}</Badge>
             <p class="leading-3 text-sm">Channel</p>
           </div>
         </div>
