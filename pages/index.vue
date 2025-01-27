@@ -76,13 +76,13 @@ const submitPost = () => {
           <Editor class="py-3" v-if="store.open"></Editor>
         </div>
       </div>
-      <div class="my-6>">
+      <ScrollArea class="my-6 h-[calc(100vh-200px)]">
         <PostCard
           v-for="(post, index) in feed.feed"
           :key="index"
           :post="post"
         />
-      </div>
+      </ScrollArea>
     </div>
   </div>
 </template>
