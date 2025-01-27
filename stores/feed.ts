@@ -7,7 +7,7 @@ export const feedStore = defineStore("feed", {
 });
 
 interface Posts {
-  id: number;
+  uuid: string;
   title: string;
   createdAt: Date;
   createdBy: {
@@ -18,4 +18,5 @@ interface Posts {
     id: number;
     name: string;
   };
+  comments: number;
 }
