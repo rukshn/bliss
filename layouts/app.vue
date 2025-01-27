@@ -224,6 +224,14 @@ onMounted(() => {
     })
     .catch((error) => console.error("Error:", error));
 });
+
+const logout = () => {
+  const jwt = useCookie("jwt");
+  jwt.value = "";
+  const token = useCookie("token");
+  token.value = "";
+  navigateTo("/login");
+};
 </script>
 <template>
   <div class="flex h-screen">
@@ -524,7 +532,7 @@ onMounted(() => {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem @click="logout">
                     <LogOut />
                     Log out
                   </DropdownMenuItem>
