@@ -5,6 +5,8 @@ export default defineEventHandler(async (event) => {
   const jwtKey = new TextEncoder().encode(process.env.JWT_KEY);
   try {
     if (url.pathname.includes("githubLogin")) return;
+    if (url.pathname.includes("signup")) return;
+    if (url.pathname.includes("login")) return;
     if (url.pathname.includes("api")) {
       let token = event.headers.get("Authorization");
       if (!token) {
