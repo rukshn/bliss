@@ -7,8 +7,14 @@ const getChannelPosts = async (channelId: number) => {
     where: {
       channelId,
       published: true,
+      parentId: null,
     },
     select: {
+      _count: {
+        select: {
+          Post: true,
+        },
+      },
       uuid: true,
       title: true,
       created_at: true,
@@ -40,6 +46,7 @@ const getChannelPosts = async (channelId: number) => {
         id: post.channel.id,
         name: post.channel.title,
       },
+      comments: post._count.Post,
     };
   });
   return tempPosts;
