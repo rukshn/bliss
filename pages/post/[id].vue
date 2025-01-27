@@ -21,6 +21,16 @@ const channelName = ref("");
 const channelId = ref(0);
 const jwt = useCookie("jwt");
 const postLoaded = ref(false);
+const comments: Ref<
+  {
+    author: { name: string; email: string };
+    id: number;
+    content: string;
+    title: string;
+    avatar: string;
+    created_at: Date;
+  }[]
+> = ref([]);
 
 onMounted(() => {
   const id = useRoute().params.id;
@@ -41,6 +51,7 @@ onMounted(() => {
       channelName.value = data.data.channel.title;
       channelId.value = data.data.channel.id;
       postId.value = data.data.id;
+      comments.value = data.data.comments;
       postLoaded.value = true;
     });
 });
@@ -98,8 +109,8 @@ const submitPost = () => {
 </script>
 
 <template>
-  <div class="px-4 sm:px-6 lg:px-8 py-8 border-l min-h-full">
-    <div class="max-w-4xl">
+  <ScrollArea class="px-4 sm:px-6 lg:px-8 py-8 border-l h-screen">
+    <div class="max-w-3xl mx-10">
       <div v-if="postLoaded === false" class="flex flex-col w-full space-y-3">
         <Skeleton class="h-[125px] rounded-xl" />
         <div class="space-y-2">
@@ -132,10 +143,11 @@ const submitPost = () => {
         </div>
         <p class="ml-auto">{{ channelName }}</p>
       </div>
-      <article class="prose mt-4">
+      <article class="prose prose-sm mt-4">
         <h1 class="font-medium text-2xl">{{ postTitle }}</h1>
         <div v-html="postContent"></div>
       </article>
+      <Separator class="my-4" />
       <div class="mt-4">
         <div class="my-6">
           <div class="bg-gray-100 py-3 rounded-lg px-3">
@@ -167,6 +179,17 @@ const submitPost = () => {
           </div>
         </div>
       </div>
+      <div class="mt-4 grid gap-4 mb-52">
+        <p class="font-medium text-gray-700">Activity</p>
+        <p v-if="comments.length === 0" class="text-muted-foreground">
+          There is no activity to show
+        </p>
+        <CommentCard
+          v-for="comment in comments"
+          :key="comment.id"
+          :comment="comment"
+        ></CommentCard>
+      </div>
     </div>
-  </div>
+  </ScrollArea>
 </template>
