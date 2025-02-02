@@ -10,6 +10,12 @@ export default defineNuxtConfig({
     "nuxt-tiptap-editor",
     "@pinia/nuxt",
   ],
+  nitro: {
+    experimental: {
+      websocket: true,
+    },
+    plugins: ["~/server/plugin/socket.io.ts"],
+  },
   shadcn: {
     /**
      * Prefix for all the imported component

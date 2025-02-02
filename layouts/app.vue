@@ -19,10 +19,12 @@ import {
 import { userStore } from "~/stores/user";
 import { channelStore } from "~/stores/channel";
 import { feedStore } from "~/stores/feed";
+import { onlineUserStore } from "~/stores/onlineUsers";
 
 const feed = feedStore();
 const store = userStore();
 const chStore = channelStore();
+const onlineStore = onlineUserStore();
 const channelName = ref("");
 const channelCollapseOpen = ref(false);
 const channelDescription = ref("");
@@ -200,6 +202,28 @@ onMounted(() => {
   if (!jwt.value) {
     navigateTo("/login");
   }
+
+  const onlineUsers = fetch("/api/user/onlineUsers", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt.value}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      data.data.users.forEach(
+        (user: {
+          id: number;
+          name: string;
+          avatar: string;
+          lastSeen: Date;
+          onlineStatus: boolean;
+        }) => {
+          user.onlineStatus = false;
+          onlineStore.users.set(user.id, user);
+        }
+      );
+    });
 
   const fetchProjects = fetch("/api/project/getUserProjects", {
     method: "GET",
@@ -543,7 +567,14 @@ const logout = () => {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <slot />
+        <div class="grid grid-cols-6 gap-4">
+          <div class="col-span-4">
+            <slot />
+          </div>
+          <div class="border-l">
+            <UserList />
+          </div>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   </div>
