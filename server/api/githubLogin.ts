@@ -108,6 +108,11 @@ export default defineEventHandler(async (event) => {
       maxAge: token.refresh_token_expires_in,
       path: "/",
     });
+
+    setCookie(event, "userId", dbUser.id.toString(), {
+      maxAge: token.expires_in,
+      path: "/",
+    });
   }
   return sendRedirect(event, "/");
 });

@@ -43,7 +43,7 @@ const userLogin = async (email: string, password: string) => {
     githubId: user.githubId,
   });
 
-  return { status: 200, data: { jwt } };
+  return { status: 200, data: { jwt, userId: user.id } };
 };
 
 export default defineEventHandler(async (event) => {
@@ -59,6 +59,11 @@ export default defineEventHandler(async (event) => {
     });
 
     setCookie(event, "token", login.data.jwt, {
+      maxAge: 60 * 60 * 24,
+      path: "/",
+    });
+
+    setCookie(event, "userId", login.data.userId.toString(), {
       maxAge: 60 * 60 * 24,
       path: "/",
     });
