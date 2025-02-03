@@ -18,7 +18,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="py-2 my-2 hover:bg-gray-50 rounded-lg px-4">
+  <div class="py-2 my-2.5 hover:bg-gray-50 rounded-lg px-4">
     <div class="flex items-center">
       <div class="flex items-center gap-4 flex-grow">
         <Avatar>
@@ -28,7 +28,7 @@ const props = defineProps<{
         <div class="grid">
           <a
             :href="`/post/${post.uuid}`"
-            class="text-gray-800 font-medium"
+            class="text-gray-800 font-medium text-lg"
             variant="link"
             >{{ post.title }}</a
           >
