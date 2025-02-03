@@ -52,37 +52,31 @@ const submitPost = () => {
 </script>
 <template>
   <div class="px-4 sm:px-6 lg:px-8 py-8 border-l min-h-full">
-    <div class="max-w-4xl">
-      <h1 class="font-bold text-3xl">{{ chStore.channel.title }}</h1>
-      <div class="my-6">
-        <div class="bg-gray-100 py-3 rounded-lg px-3">
-          <div class="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage :src="user.user.avatar ?? ''" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <Label>{{ username }}</Label>
-            <Button
-              variant="ghost"
-              @click="toggleEditor"
-              class="py-4 justify-start h-full flex-grow"
-            >
-              <Label class="cursor-pointer">What do you want to share?</Label>
-            </Button>
-            <div class="ml-auto">
-              <Button @click="submitPost">Post</Button>
-            </div>
+    <h1 class="font-bold text-3xl">{{ chStore.channel.title }}</h1>
+    <div class="my-6">
+      <div class="bg-gray-100 py-3 rounded-lg px-3">
+        <div class="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage :src="user.user.avatar ?? ''" />
+            <AvatarFallback>JD</AvatarFallback>
+          </Avatar>
+          <Label>{{ username }}</Label>
+          <Button
+            variant="ghost"
+            @click="toggleEditor"
+            class="py-4 justify-start h-full flex-grow"
+          >
+            <Label class="cursor-pointer">What do you want to share?</Label>
+          </Button>
+          <div class="ml-auto">
+            <Button @click="submitPost">Post</Button>
           </div>
-          <Editor class="py-3" v-if="store.open"></Editor>
         </div>
+        <Editor class="py-3" v-if="store.open"></Editor>
       </div>
-      <ScrollArea class="my-6 h-[calc(100vh-200px)]">
-        <PostCard
-          v-for="(post, index) in feed.feed"
-          :key="index"
-          :post="post"
-        />
-      </ScrollArea>
     </div>
+    <ScrollArea class="my-6 grid h-[calc(100vh-200px)]">
+      <PostCard v-for="(post, index) in feed.feed" :key="index" :post="post" />
+    </ScrollArea>
   </div>
 </template>
