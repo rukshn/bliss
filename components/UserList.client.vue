@@ -1,17 +1,15 @@
 <script lang="ts" setup>
 import { socket } from "./socket";
 import { onlineUserStore } from "~/stores/onlineUsers";
+import { userStore } from "~/stores/user";
 
 const isConnected = ref(false);
 const transport = ref("N/A");
 const user_token = useCookie("userId");
 const users = onlineUserStore();
+const user = userStore();
 
-if (socket.connected) {
-  onConnect();
-}
-
-function onConnect() {
+const onConnect = () => {
   isConnected.value = true;
   socket.emit("hello", { userId: user_token.value });
   transport.value = socket.io.engine.transport.name;
@@ -19,7 +17,7 @@ function onConnect() {
   socket.io.engine.on("upgrade", (rawTransport) => {
     transport.value = rawTransport.name;
   });
-}
+};
 function onDisconnect() {
   socket.emit("dissconnect", "something");
   isConnected.value = false;
@@ -82,6 +80,9 @@ const setOnlineStatus = (userStatus: boolean) => {
   return userStatus ? "bg-green-500" : "bg-red-500";
 };
 
+if (socket.connected) {
+  onConnect();
+}
 onBeforeUnmount(() => {
   socket.off("connect", onConnect);
   socket.off("disconnect", onDisconnect);
@@ -89,9 +90,25 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="grid gap-2 px-6">
+  <div class="grid gap-2">
     <div
-      class="flex items-center space-x-2"
+      class="flex items-center space-x-2 rounded-md mb-4 bg-gray-100 px-4 py-2"
+    >
+      <div class="relative">
+        <Avatar>
+          <AvatarImage :src="user.user.avatar" />
+          <AvatarFallback>JD</AvatarFallback>
+        </Avatar>
+        <span
+          :class="setOnlineStatus(isConnected)"
+          class="absolute top-3/4 left-6 transform -translate-y-1/2 w-3.5 h-3.5 border-2 border-white dark:border-gray-800 rounded-full"
+        ></span>
+      </div>
+      <p class="font-medium text-gray-600">{{ user.user.name }}</p>
+    </div>
+
+    <div
+      class="flex items-center space-x-2 px-4"
       v-for="(user, index) in Array.from(users.users)"
       :key="index"
     >
