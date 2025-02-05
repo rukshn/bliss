@@ -571,7 +571,7 @@ const logout = () => {
           <div class="col-span-4">
             <slot />
           </div>
-          <div class="border-l">
+          <div class="border-l col-span-2">
             <UserList />
           </div>
         </div>
