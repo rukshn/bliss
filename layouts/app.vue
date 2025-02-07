@@ -39,6 +39,8 @@ const activeChannel: Ref<{ title: string; description: string; id: number }> =
     id: 0,
   });
 
+const userId = useCookie("userId");
+
 const newChannelDialog = ref(false);
 
 const activeChannels: Ref<
@@ -129,7 +131,9 @@ const selectProject = async (project: {
     expires: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 365),
   });
   projectCookie.value = JSON.stringify(project);
-
+  if (!project.id) {
+    return;
+  }
   const activeProjectChannels = await fetch(
     `/api/project/getProjectChannels/${project.id}`,
     {
@@ -166,9 +170,18 @@ const createChannel = (e: Event) => {
   })
     .then((response) => {
       if (response.status === 200) {
-        channelName.value = "";
-        channelDescription.value = "";
+        return response.json();
       }
+    })
+    .then((data) => {
+      activeChannels.value.push({
+        title: channelName.value,
+        description: channelDescription.value,
+        id: data.data.id,
+        projectId: data.data.projectId,
+      });
+      channelName.value = "";
+      channelDescription.value = "";
     })
     .finally(() => {
       newChannelDialog.value = false;
@@ -220,7 +233,9 @@ onMounted(() => {
           onlineStatus: boolean;
         }) => {
           user.onlineStatus = false;
-          onlineStore.users.set(user.id, user);
+          if (user.id !== Number(userId.value)) {
+            onlineStore.users.set(user.id, user);
+          }
         }
       );
     });
@@ -233,7 +248,7 @@ onMounted(() => {
   })
     .then((response) => response.json())
     .then((data) => {
-      projects.value = data.data[0].Project;
+      projects.value = data.data;
       const lastProject = useCookie("activeProject");
       const lastChannel = useCookie("activeChannel");
 
@@ -567,11 +582,11 @@ const logout = () => {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <div class="grid grid-cols-6 gap-4">
-          <div class="col-span-4">
+        <div class="grid grid-cols-8 gap-4">
+          <div class="col-span-5">
             <slot />
           </div>
-          <div class="border-l col-span-2">
+          <div class="col-end-9 border-l col-span-2">
             <UserList />
           </div>
         </div>
