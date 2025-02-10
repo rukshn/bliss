@@ -3,5 +3,7 @@ export const editorStore = defineStore("editor", {
     editor: "",
     title: "",
     open: false,
+    message: "",
+    hasMessage: false,
   }),
 });
