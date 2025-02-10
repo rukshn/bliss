@@ -29,7 +29,7 @@ const channelName = ref("");
 const channelCollapseOpen = ref(false);
 const channelDescription = ref("");
 const projects: Ref<{ title: string; description: string; id: number }[]> = ref(
-  []
+  [],
 );
 const newProjectDialog = ref(false);
 const activeChannel: Ref<{ title: string; description: string; id: number }> =
@@ -120,6 +120,21 @@ const getChannelPosts = (channel: {
     });
 };
 
+const gotoHome = () => {
+  chStore.channel = {
+    title: "Home",
+    description: "This is the home feed",
+    id: 0,
+  };
+  navigateTo("/");
+  getChannelPosts({
+    id: 0,
+    title: "Home",
+    description: "This is the home feed",
+    projectId: activeProject.value.id,
+  });
+};
+
 const selectProject = async (project: {
   title: string;
   description: string;
@@ -141,7 +156,7 @@ const selectProject = async (project: {
       headers: {
         Authorization: `Bearer ${jwt.value}`,
       },
-    }
+    },
   )
     .then((res) => {
       return res.json();
@@ -236,7 +251,7 @@ onMounted(() => {
           if (user.id !== Number(userId.value)) {
             onlineStore.users.set(user.id, user);
           }
-        }
+        },
       );
     });
 
@@ -379,9 +394,7 @@ const logout = () => {
             <nav class="grid items-start px-2 font-medium lg:px-4">
               <Button
                 variant="ghost"
-                @click="
-                  chStore.channel = { title: 'Home', description: '', id: 0 }
-                "
+                @click="gotoHome()"
                 class="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Home class="h-4 w-4" />
@@ -582,8 +595,8 @@ const logout = () => {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <div class="grid grid-cols-8 gap-4">
-          <div class="col-span-5">
+        <div class="grid grid-cols-8">
+          <div class="col-span-6">
             <slot />
           </div>
           <div class="col-end-9 border-l col-span-2">
