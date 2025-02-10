@@ -24,5 +24,5 @@ export default defineEventHandler(async (event) => {
   });
 
   await prisma.$disconnect();
-  return { status: 200, data: post.id };
+  return { status: 200, data: post.uuid };
 });
