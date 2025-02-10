@@ -15,11 +15,11 @@ const store = editorStore();
 
 const editor = useEditor({
   onUpdate() {
+    if (store.hasMessage === true) store.hasMessage = false;
     if (editor.value) {
       store.editor = editor?.value.getHTML() ?? "";
     }
   },
-  autofocus: true,
   extensions: [
     TiptapStarterKit,
     Placeholder.configure({
@@ -93,9 +93,16 @@ onBeforeUnmount(() => {
       type="text"
       v-model="store.title"
       placeholder="Title"
+      autofocus
+      @update:model-value="
+        if (store.hasMessage === true) store.hasMessage = false;
+      "
       class="border-none w-full p-1 focus:outline-none bg-transparent text-lg font-semibold"
     />
     <TiptapEditorContent class="px-1" :editor="editor" />
+    <span v-if="store.hasMessage" class="text-xs p-1 text-gray-400">{{
+      store.message
+    }}</span>
   </div>
 </template>
 
