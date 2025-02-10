@@ -56,29 +56,30 @@ onMounted(() => {
     });
 });
 
-hotkeys("ctrl+r,command+r,ctrl+b,r,f", function (event, handler) {
-  switch (handler.key) {
-    case "ctrl+r":
-      toggleEditor.value = !toggleEditor.value;
-      break;
-    case "command+r":
-      event.preventDefault();
-      toggleEditor.value = !toggleEditor.value;
-      break;
-    case "ctrl+b":
-      console.log("ctrl+b pressed");
-      break;
-    case "r":
-      console.log("r pressed");
-      break;
-    case "f":
-      console.log("f pressed");
-      break;
-    default:
-      break;
-  }
-});
-
+if (document) {
+  hotkeys("ctrl+r,command+r,ctrl+b,r,f", function (event, handler) {
+    switch (handler.key) {
+      case "ctrl+r":
+        toggleEditor.value = !toggleEditor.value;
+        break;
+      case "command+r":
+        event.preventDefault();
+        toggleEditor.value = !toggleEditor.value;
+        break;
+      case "ctrl+b":
+        console.log("ctrl+b pressed");
+        break;
+      case "r":
+        console.log("r pressed");
+        break;
+      case "f":
+        console.log("f pressed");
+        break;
+      default:
+        break;
+    }
+  });
+}
 const submitPost = () => {
   if (editor.title.trim().length === 0) {
     return;
@@ -86,7 +87,7 @@ const submitPost = () => {
   if (editor.editor.trim().length === 0) {
     return;
   }
-  const channel = fetch("/api/post/create", {
+  fetch("/api/post/create", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
