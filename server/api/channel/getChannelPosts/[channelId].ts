@@ -3,35 +3,73 @@ import crypto from "crypto";
 
 const getChannelPosts = async (channelId: number) => {
   const prisma = new PrismaClient();
-  const posts = await prisma.post.findMany({
-    where: {
-      channelId,
-      published: true,
-      parentId: null,
-    },
-    select: {
-      _count: {
-        select: {
-          Post: true,
+  let posts;
+  if (channelId === 0) {
+    posts = await prisma.post.findMany({
+      where: {
+        published: true,
+        parentId: null,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      select: {
+        _count: {
+          select: {
+            Post: true,
+          },
+        },
+        uuid: true,
+        title: true,
+        created_at: true,
+        channel: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-      uuid: true,
-      title: true,
-      created_at: true,
-      channel: {
-        select: {
-          id: true,
-          title: true,
+    });
+  } else {
+    posts = await prisma.post.findMany({
+      where: {
+        channelId,
+        published: true,
+        parentId: null,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+      select: {
+        _count: {
+          select: {
+            Post: true,
+          },
+        },
+        uuid: true,
+        title: true,
+        created_at: true,
+        channel: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-    },
-  });
+    });
+  }
   await prisma.$disconnect();
   const tempPosts = posts.map((post) => {
     return {
