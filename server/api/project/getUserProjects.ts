@@ -20,7 +20,16 @@ const getUserProjects = async (userId: number) => {
       await prisma.$disconnect();
     });
 
-  return projects;
+  return projects.map((project) => {
+    if (project.Project === null) {
+      return;
+    }
+    return {
+      id: project.Project.id,
+      title: project.Project.title,
+      description: project.Project.description,
+    };
+  });
 };
 
 export default defineEventHandler(async (event) => {
