@@ -29,7 +29,7 @@ const channelName = ref("");
 const channelCollapseOpen = ref(false);
 const channelDescription = ref("");
 const projects: Ref<{ title: string; description: string; id: number }[]> = ref(
-  [],
+  []
 );
 const newProjectDialog = ref(false);
 const activeChannel: Ref<{ title: string; description: string; id: number }> =
@@ -135,6 +135,10 @@ const gotoHome = () => {
   });
 };
 
+const gotoInbox = () => {
+  navigateTo("/inbox");
+};
+
 const selectProject = async (project: {
   title: string;
   description: string;
@@ -156,7 +160,7 @@ const selectProject = async (project: {
       headers: {
         Authorization: `Bearer ${jwt.value}`,
       },
-    },
+    }
   )
     .then((res) => {
       return res.json();
@@ -251,7 +255,7 @@ onMounted(() => {
           if (user.id !== Number(userId.value)) {
             onlineStore.users.set(user.id, user);
           }
-        },
+        }
       );
     });
 
@@ -402,9 +406,7 @@ const logout = () => {
               </Button>
               <Button
                 variant="ghost"
-                @click="
-                  chStore.channel = { title: 'Inbox', description: '', id: 0 }
-                "
+                @click="gotoInbox()"
                 class="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Inbox class="h-4 w-4" />
