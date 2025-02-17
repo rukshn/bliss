@@ -5,7 +5,9 @@ const props = defineProps<{
       name: string;
       avatar: string;
     };
-    message: string;
+    content: string;
+    title: string;
+    uuid: string;
     createdAt: Date;
   };
 }>();
