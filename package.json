@@ -18,7 +18,7 @@
     "@prisma/nuxt": "0.3.0",
     "@radix-icons/vue": "^1.0.0",
     "@tiptap/extension-placeholder": "^2.11.5",
-    "@vueuse/core": "^12.5.0",
+    "@vueuse/core": "^13.3.0",
     "argon2": "^0.41.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
